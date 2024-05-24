@@ -1,6 +1,5 @@
 using ControlInventario.Core.Repositories.Interfaces;
 using ControlInventario.Datos.DTO;
-using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace ControlInventario.WebApi.Middlewares;

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Builder;
 namespace ControlInventario.WebApi.Middlewares;
 public static class RequestUserMiddlewareExtensions
 {
