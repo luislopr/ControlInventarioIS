@@ -1,5 +1,7 @@
-﻿using ControlInventario.Datos.ControlInventarioObjects;
+﻿using ControlInventario.Core.Repositorios.Interfaces;
+using ControlInventario.Datos.ControlInventarioObjects;
 using ControlInventario.Datos.DTO;
+using ControlInventario.Datos.Repositorios;
 
 namespace ControlInventario.Core.Repositorios;
 public class ProveedorRepositorio : Repository<PostgresContext, Proveedor>, IProveedorRepositorio

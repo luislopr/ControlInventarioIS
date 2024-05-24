@@ -13,13 +13,21 @@ public partial class PostgresContext : DbContext
 
     public virtual DbSet<CatalogoProveedor> CatalogoProveedor { get; set; }
 
+    public virtual DbSet<Cliente> Cliente { get; set; }
+
+    public virtual DbSet<Factura> Factura { get; set; }
+
     public virtual DbSet<Inventario> Inventario { get; set; }
 
     public virtual DbSet<Proveedor> Proveedor { get; set; }
 
     public virtual DbSet<Role> Role { get; set; }
 
+    public virtual DbSet<SystemUuidKey> SystemUuidKey { get; set; }
+
     public virtual DbSet<Usuario> Usuario { get; set; }
+
+    public virtual DbSet<Venta> Venta { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -57,14 +65,77 @@ public partial class PostgresContext : DbContext
                 .HasConstraintName("provider_id_FK");
         });
 
+        modelBuilder.Entity<Cliente>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("cliente_pkey");
+
+            entity.ToTable("cliente");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("fecha_creacion");
+            entity.Property(e => e.Nombre)
+                .HasColumnType("character varying")
+                .HasColumnName("nombre");
+            entity.Property(e => e.NumeroIdentidad).HasColumnName("numero_identidad");
+            entity.Property(e => e.Telefono)
+                .HasColumnType("character varying")
+                .HasColumnName("telefono");
+        });
+
+        modelBuilder.Entity<Factura>(entity =>
+        {
+            entity.HasKey(e => e.IdProveedor).HasName("factura_pkey");
+
+            entity.ToTable("factura");
+
+            entity.Property(e => e.IdProveedor)
+                .ValueGeneratedNever()
+                .HasColumnName("id_proveedor");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("fecha_creacion");
+            entity.Property(e => e.FechaFactura)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("fecha_factura");
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd()
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.NumeroControl).HasColumnName("numero_control");
+            entity.Property(e => e.NumeroFactura).HasColumnName("numero_factura");
+            entity.Property(e => e.Subtotal).HasColumnName("subtotal");
+            entity.Property(e => e.TotalDescuento).HasColumnName("total_descuento");
+            entity.Property(e => e.TotalImpuesto).HasColumnName("total_impuesto");
+            entity.Property(e => e.TotalNeto).HasColumnName("total_neto");
+
+            entity.HasOne(d => d.IdProveedorNavigation).WithOne(p => p.Factura)
+                .HasForeignKey<Factura>(d => d.IdProveedor)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("provider_id_FK");
+        });
+
         modelBuilder.Entity<Inventario>(entity =>
         {
             entity
                 .HasNoKey()
                 .ToTable("inventario");
 
-            entity.Property(e => e.CatalogoProveedorId).HasColumnName("catalogo_proveedor_id");
+            entity.Property(e => e.CodigoArticulo)
+                .HasColumnType("character varying")
+                .HasColumnName("codigo_articulo");
+            entity.Property(e => e.CodigoBarra)
+                .HasColumnType("character varying")
+                .HasColumnName("codigo_barra");
             entity.Property(e => e.Costo).HasColumnName("costo");
+            entity.Property(e => e.DescripciónArticulo)
+                .HasColumnType("character varying")
+                .HasColumnName("descripción_articulo");
             entity.Property(e => e.Existencia)
                 .HasDefaultValue(0)
                 .HasColumnName("existencia");
@@ -77,6 +148,12 @@ public partial class PostgresContext : DbContext
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
             entity.Property(e => e.Precio).HasColumnName("precio");
+            entity.Property(e => e.ProveedorId).HasColumnName("proveedor_id");
+
+            entity.HasOne(d => d.Proveedor).WithMany()
+                .HasForeignKey(d => d.ProveedorId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("proveedor_id_FK");
         });
 
         modelBuilder.Entity<Proveedor>(entity =>
@@ -91,6 +168,9 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.DiasCredito)
                 .HasDefaultValue(0)
                 .HasColumnName("dias_credito");
+            entity.Property(e => e.DiasPromedioEntrega)
+                .HasDefaultValueSql("1")
+                .HasColumnName("dias_promedio_entrega");
             entity.Property(e => e.Direccion)
                 .HasMaxLength(100)
                 .HasColumnName("direccion");
@@ -129,6 +209,26 @@ public partial class PostgresContext : DbContext
                 .HasColumnName("rol");
         });
 
+        modelBuilder.Entity<SystemUuidKey>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("system_uuid_key_pkey");
+
+            entity.ToTable("system_uuid_key");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.CreationDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("creation_date");
+            entity.Property(e => e.ExpirationDate)
+                .HasDefaultValueSql("(CURRENT_TIMESTAMP + '2 days'::interval day)")
+                .HasColumnName("expiration_date");
+            entity.Property(e => e.Uuid)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("uuid");
+        });
+
         modelBuilder.Entity<Usuario>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("usuario_pkey");
@@ -165,6 +265,33 @@ public partial class PostgresContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("role_id_FK");
+        });
+
+        modelBuilder.Entity<Venta>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("venta_pkey");
+
+            entity.ToTable("venta");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd()
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.ClienteId).HasColumnName("cliente_id");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("fecha_creacion");
+            entity.Property(e => e.FechaFactura).HasColumnName("fecha_factura");
+            entity.Property(e => e.MontoBase).HasColumnName("monto_base");
+            entity.Property(e => e.MontoIva).HasColumnName("monto_iva");
+            entity.Property(e => e.NumeroControl).HasColumnName("numero_control");
+            entity.Property(e => e.NumeroFactura).HasColumnName("numero_factura");
+            entity.Property(e => e.PorcentajeIva).HasColumnName("porcentaje_iva");
+
+            entity.HasOne(d => d.IdNavigation).WithOne(p => p.Venta)
+                .HasForeignKey<Venta>(d => d.Id)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("cliente_id_FK");
         });
 
         OnModelCreatingPartial(modelBuilder);

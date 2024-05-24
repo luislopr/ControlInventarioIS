@@ -21,5 +21,9 @@ public partial class Proveedor
 
     public int DiasCredito { get; set; }
 
+    public decimal? DiasPromedioEntrega { get; set; }
+
     public virtual ICollection<CatalogoProveedor> CatalogoProveedor { get; set; } = new List<CatalogoProveedor>();
+
+    public virtual Factura? Factura { get; set; }
 }

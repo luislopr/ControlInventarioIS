@@ -1,7 +1,7 @@
-﻿using CuadroMando.WebApi.Filter;
+﻿using ControlInventario.WebApi.Filter;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ControlInventario.Controllers;
+namespace ControlInventario.WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]

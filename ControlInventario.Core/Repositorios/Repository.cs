@@ -1,5 +1,8 @@
-﻿using ControlInventario.Core.Repositorios.Interfaces;
+﻿using ControlInventario.Core.Helpers;
+using ControlInventario.Core.Repositories.Interfaces;
+using ControlInventario.Core.Repositorios.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Linq.Expressions;
 
 namespace ControlInventario.Core.Repositorios;
@@ -7,6 +10,8 @@ public abstract class Repository<TContext, TEntity> : IRepository<TContext, TEnt
 {
     private readonly DbContext _context;
     private readonly DbSet<TEntity> _table;
+    protected readonly AppSettings _appSettings;
+    protected readonly IAuthRepository _usersRepository;
 
     public Repository(TContext context)
     {
@@ -14,6 +19,20 @@ public abstract class Repository<TContext, TEntity> : IRepository<TContext, TEnt
         _table = _context.Set<TEntity>();
     }
 
+    public Repository(TContext context, IOptions<AppSettings> options)
+    {
+        _context = context;
+        _table = _context.Set<TEntity>();
+        this._appSettings = options.Value;
+    }
+
+    public Repository(TContext context, IOptions<AppSettings> options, IAuthRepository usersRepository)
+    {
+        _context = context;
+        _table = _context.Set<TEntity>();
+        this._appSettings = options.Value;
+        this._usersRepository = usersRepository;
+    }
     public async Task SaveChangeAsync(CancellationToken cancellation, int contador = 0)
     {
         try { await _context.SaveChangesAsync(cancellation); }

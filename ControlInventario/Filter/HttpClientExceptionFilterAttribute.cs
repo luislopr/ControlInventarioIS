@@ -3,7 +3,7 @@ using ControlInventario.Datos.DTO;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace CuadroMando.WebApi.Filter;
+namespace ControlInventario.WebApi.Filter;
 public class HttpClientExceptionFilterAttribute : ExceptionFilterAttribute
 {
     public override void OnException(ExceptionContext context)

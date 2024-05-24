@@ -1,4 +1,4 @@
-﻿namespace ControlInventario.Core.Repositorios
+﻿namespace ControlInventario.Core.Repositorios.Interfaces
 {
     internal interface IProveedorRepositorio
     {

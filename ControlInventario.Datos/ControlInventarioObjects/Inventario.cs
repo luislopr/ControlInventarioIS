@@ -11,9 +11,17 @@ public partial class Inventario
 
     public int Existencia { get; set; }
 
-    public int CatalogoProveedorId { get; set; }
+    public int ProveedorId { get; set; }
 
     public decimal Costo { get; set; }
 
     public decimal Precio { get; set; }
+
+    public string CodigoArticulo { get; set; } = null!;
+
+    public string DescripciónArticulo { get; set; } = null!;
+
+    public string CodigoBarra { get; set; } = null!;
+
+    public virtual Proveedor Proveedor { get; set; } = null!;
 }
