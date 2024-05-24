@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ControlInventario.Controllers;
+namespace ControlInventario.WebApi.Controllers;
 
 public class ArticulosController // : BaseController<>
 {
