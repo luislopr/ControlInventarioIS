@@ -1,22 +1,26 @@
-using System.Text;
-using System.Security.Claims;
-using Microsoft.Extensions.Options;
+using ControlInventario.Datos.ControlInventarioObjects;
+using ControlInventario.Core.Repositories.Interfaces;
+using ControlInventario.Core.Repositorios.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
 using ControlInventario.Core.Helpers;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using ControlInventario.Core.Repositorios;
-using ControlInventario.Core.Repositories.Interfaces;
-using ControlInventario.Datos.ControlInventarioObjects;
 using ControlInventario.Core.Models;
+using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
+using System.Security.Claims;
+using System.Text;
 
 namespace ControlInventario.Core.Repositories;
 
-public class AuthRepository(PostgresContext contextFactory, IOptions<AppSettings> appSettings)
-    : Repository<PostgresContext, Usuario>(contextFactory, appSettings), IAuthRepository
+public class AuthRepository(PostgresContext contextFactory, IOptions<AppSettings> appSettings,
+    ISystemUuidRepositorio systemUuidRepositorio, IUsuariosRepositorio usersRepository) : IAuthRepository
 {
+    private readonly ISystemUuidRepositorio _systemUuidRepositorio = systemUuidRepositorio;
+    private readonly IUsuariosRepositorio _usersRepository = usersRepository;
+    private readonly AppSettings _appSettings = appSettings.Value;
     public bool ValidateToken(string token)
     {
-        SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(base._appSettings.Secret));
+        SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(this._appSettings.Secret));
         var tokenHandler = new JwtSecurityTokenHandler();
 
         try
@@ -37,8 +41,7 @@ public class AuthRepository(PostgresContext contextFactory, IOptions<AppSettings
     }
     public async Task<string> PostAuthAsync(string username, string password, CancellationToken cancellationToken = default)
     {
-        var usuario = await base.GetFirst(b => b.Login == username && b.Contraseña == password, cancellationToken);
-
+        var usuario = await _usersRepository.ObtenerUsuarioCredenciales(username, password, cancellationToken);
         if (usuario == null) throw new InvalidOperationException("Usuario o clave inválida");
         if (usuario.Status == false) throw new InvalidOperationException("Usuario inactivo");
 
@@ -61,8 +64,37 @@ public class AuthRepository(PostgresContext contextFactory, IOptions<AppSettings
         string tokenRespone = tokenHandler.WriteToken(token);
         return tokenRespone;
     }
-    public async Task<string> RegisterAsync(RegisterRequestModel a, CancellationToken cancellationToken)
+    public async Task<string> RegisterAsync(RegisterRequestModel datosRegistro, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var uuid = await this._systemUuidRepositorio.GetSystemUuidKeyAsync(cancellationToken);
+        //no implementado aun en BDD
+        /*string hashedKey = this.HashPassword(datosRegistro.LlaveActivación);
+        if (uuid.Uuid.ToString() != hashedKey) throw new InvalidOperationException("Llave de activación Invalida");     */
+
+        if (uuid.Uuid.ToString() != datosRegistro.LlaveActivación) throw new InvalidOperationException("Llave de activación Invalida");
+
+        var mainUser = new Usuario
+        {
+            FechaCreacion = TimeOnly.FromDateTime(DateTime.Now),
+            NombreCompleto = datosRegistro.NombrePersona,
+            RoleId = _appSettings.Roles.Administrador,
+            Contraseña = datosRegistro.Contraseña,
+            Login = datosRegistro.NombreUsuario,
+            Email = datosRegistro.Email,
+        };
+
+        await _usersRepository.CrearUsuario(mainUser, cancellationToken);
+        var token = await this.PostAuthAsync(datosRegistro.NombreUsuario, datosRegistro.Contraseña);
+        return token;
+    }
+
+    // Función para convertir una contraseña a SHA-256
+    private string HashPassword(string password)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(hash);
+        }
     }
 }

@@ -13,7 +13,7 @@ public class RequestUserMiddleware
         _next = next;
     }
 
-    public async Task Invoke(HttpContext httpContext, IUsersRepository repository)
+    public async Task Invoke(HttpContext httpContext, IUsuariosRepositorio repository)
     {
         if (httpContext.User.Identity is ClaimsIdentity identity && identity.Claims.Any())
         {

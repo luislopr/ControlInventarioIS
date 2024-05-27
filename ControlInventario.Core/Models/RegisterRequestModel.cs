@@ -4,11 +4,13 @@ namespace ControlInventario.Core.Models;
 public class RegisterRequestModel
 {
     [Required]
-    public string UserName { get; set;}
+    public string NombreUsuario { get; set;}
     [Required]
     public string Email { get; set;}
     [Required]
-    public string UserLogin { get; set;}
+    public string NombrePersona { get; set;}
     [Required]
-    public string Password { get; set;}
+    public string Contraseña { get; set;}
+    [Required]
+    public string LlaveActivación { get; set; }
 }

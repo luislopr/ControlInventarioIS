@@ -90,4 +90,6 @@ public abstract class Repository<TContext, TEntity> : IRepository<TContext, TEnt
         _table.Remove(obj);
         await SaveChangeAsync(cancellation);
     }
+
+    public async Task<TEntity?> GetById(int id) => await this._table.FindAsync(id);
 }

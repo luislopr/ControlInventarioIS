@@ -2,11 +2,13 @@ using ControlInventario.Core.Helpers;
 using ControlInventario.Core.Repositories;
 using ControlInventario.Core.Repositories.Interfaces;
 using ControlInventario.Datos.ControlInventarioObjects;
+using ControlInventario.Core.Repositorios.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using ControlInventario.Core.Repositorios;
 using ControlInventario.WebApi.Middlewares;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,8 +66,10 @@ builder.Services.AddCors(options =>
                       });
 });
 
-builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+builder.Services.AddScoped<IUsuariosRepositorio, UsersRepositorio>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IProveedorRepositorio, ProveedorRepositorio>();
+builder.Services.AddScoped<ISystemUuidRepositorio, SystemUuidKeyRepositorio>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
