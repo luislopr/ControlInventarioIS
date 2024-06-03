@@ -15,19 +15,27 @@ public partial class PostgresContext : DbContext
 
     public virtual DbSet<Cliente> Cliente { get; set; }
 
-    public virtual DbSet<Factura> Factura { get; set; }
-
     public virtual DbSet<Inventario> Inventario { get; set; }
+
+    public virtual DbSet<Notificacion> Notificacion { get; set; }
+
+    public virtual DbSet<Orden> Orden { get; set; }
+
+    public virtual DbSet<OrdenDetalle> OrdenDetalle { get; set; }
 
     public virtual DbSet<Proveedor> Proveedor { get; set; }
 
-    public virtual DbSet<Role> Role { get; set; }
+    public virtual DbSet<Roles> Roles { get; set; }
 
     public virtual DbSet<SystemUuidKey> SystemUuidKey { get; set; }
+
+    public virtual DbSet<TipoOrden> TipoOrden { get; set; }
 
     public virtual DbSet<Usuario> Usuario { get; set; }
 
     public virtual DbSet<Venta> Venta { get; set; }
+
+    public virtual DbSet<VentaDetalle> VentaDetalle { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,6 +47,8 @@ public partial class PostgresContext : DbContext
 
             entity.ToTable("catalogo_proveedor");
 
+            entity.HasIndex(e => e.CodigoArticulo, "catalogo_proveedor_unique").IsUnique();
+
             entity.HasIndex(e => new { e.IdProveedor, e.CodigoBarra }, "cod_barra_x_proveedor_UNIQUE").IsUnique();
 
             entity.Property(e => e.Id)
@@ -47,6 +57,9 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.ArticuloProveedor)
                 .HasMaxLength(40)
                 .HasColumnName("articulo_proveedor");
+            entity.Property(e => e.CodigoArticulo)
+                .HasColumnType("character varying")
+                .HasColumnName("codigo_articulo");
             entity.Property(e => e.CodigoBarra)
                 .HasMaxLength(15)
                 .HasColumnName("codigo_barra");
@@ -87,39 +100,6 @@ public partial class PostgresContext : DbContext
                 .HasColumnName("telefono");
         });
 
-        modelBuilder.Entity<Factura>(entity =>
-        {
-            entity.HasKey(e => e.IdProveedor).HasName("factura_pkey");
-
-            entity.ToTable("factura");
-
-            entity.Property(e => e.IdProveedor)
-                .ValueGeneratedNever()
-                .HasColumnName("id_proveedor");
-            entity.Property(e => e.FechaCreacion)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("fecha_creacion");
-            entity.Property(e => e.FechaFactura)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("fecha_factura");
-            entity.Property(e => e.Id)
-                .ValueGeneratedOnAdd()
-                .UseIdentityAlwaysColumn()
-                .HasColumnName("id");
-            entity.Property(e => e.NumeroControl).HasColumnName("numero_control");
-            entity.Property(e => e.NumeroFactura).HasColumnName("numero_factura");
-            entity.Property(e => e.Subtotal).HasColumnName("subtotal");
-            entity.Property(e => e.TotalDescuento).HasColumnName("total_descuento");
-            entity.Property(e => e.TotalImpuesto).HasColumnName("total_impuesto");
-            entity.Property(e => e.TotalNeto).HasColumnName("total_neto");
-
-            entity.HasOne(d => d.IdProveedorNavigation).WithOne(p => p.Factura)
-                .HasForeignKey<Factura>(d => d.IdProveedor)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("provider_id_FK");
-        });
-
         modelBuilder.Entity<Inventario>(entity =>
         {
             entity
@@ -154,6 +134,91 @@ public partial class PostgresContext : DbContext
                 .HasForeignKey(d => d.ProveedorId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("proveedor_id_FK");
+        });
+
+        modelBuilder.Entity<Notificacion>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("notificacion_pk");
+
+            entity.ToTable("notificacion");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Fecha)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("fecha");
+            entity.Property(e => e.FechaVisto)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("fecha_visto");
+            entity.Property(e => e.Mensaje)
+                .HasColumnType("character varying")
+                .HasColumnName("mensaje");
+            entity.Property(e => e.RolDestino).HasColumnName("rol_destino");
+        });
+
+        modelBuilder.Entity<Orden>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("orden_pk");
+
+            entity.ToTable("orden");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("fecha_creacion");
+            entity.Property(e => e.FechaOrden)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("fecha_orden");
+            entity.Property(e => e.IdProveedor).HasColumnName("id_proveedor");
+            entity.Property(e => e.NumeroControl).HasColumnName("numero_control");
+            entity.Property(e => e.NumeroOrden).HasColumnName("numero_orden");
+            entity.Property(e => e.OrdenReferencia).HasColumnName("orden_referencia");
+            entity.Property(e => e.Subtotal).HasColumnName("subtotal");
+            entity.Property(e => e.TipoOrden).HasColumnName("tipo_orden");
+            entity.Property(e => e.TotalDescuento).HasColumnName("total_descuento");
+            entity.Property(e => e.TotalImpuesto).HasColumnName("total_impuesto");
+            entity.Property(e => e.TotalNeto).HasColumnName("total_neto");
+
+            entity.HasOne(d => d.IdProveedorNavigation).WithMany(p => p.Orden)
+                .HasForeignKey(d => d.IdProveedor)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("provider_id_FK");
+
+            entity.HasOne(d => d.TipoOrdenNavigation).WithMany(p => p.Orden)
+                .HasForeignKey(d => d.TipoOrden)
+                .HasConstraintName("orden_tipo_orden_fk");
+        });
+
+        modelBuilder.Entity<OrdenDetalle>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("orden_detalle");
+
+            entity.Property(e => e.Cantidad).HasColumnName("cantidad");
+            entity.Property(e => e.CostoBolivares).HasColumnName("costo_bolivares");
+            entity.Property(e => e.CostoRef).HasColumnName("costo_ref");
+            entity.Property(e => e.CostoTotal).HasColumnName("costo_total");
+            entity.Property(e => e.DescuentoUnidad).HasColumnName("descuento_unidad");
+            entity.Property(e => e.IdArticuloProveedor).HasColumnName("id_articulo_proveedor");
+            entity.Property(e => e.IdOrden).HasColumnName("id_orden");
+            entity.Property(e => e.IdProveedor).HasColumnName("id_proveedor");
+            entity.Property(e => e.TasaDia).HasColumnName("tasa_dia");
+
+            entity.HasOne(d => d.IdArticuloProveedorNavigation).WithMany()
+                .HasForeignKey(d => d.IdArticuloProveedor)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("articulo_proveedor_FK");
+
+            entity.HasOne(d => d.IdProveedorNavigation).WithMany()
+                .HasForeignKey(d => d.IdProveedor)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("proveedor_FK");
         });
 
         modelBuilder.Entity<Proveedor>(entity =>
@@ -192,11 +257,11 @@ public partial class PostgresContext : DbContext
                 .HasColumnName("telefono");
         });
 
-        modelBuilder.Entity<Role>(entity =>
+        modelBuilder.Entity<Roles>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("role_pkey");
 
-            entity.ToTable("role");
+            entity.ToTable("roles");
 
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
@@ -229,6 +294,20 @@ public partial class PostgresContext : DbContext
                 .HasColumnName("uuid");
         });
 
+        modelBuilder.Entity<TipoOrden>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("tipo_orden_pk");
+
+            entity.ToTable("tipo_orden");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.Descripcion)
+                .HasColumnType("character varying")
+                .HasColumnName("descripcion");
+        });
+
         modelBuilder.Entity<Usuario>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("usuario_pkey");
@@ -248,6 +327,9 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Email)
                 .HasColumnType("character varying")
                 .HasColumnName("email");
+            entity.Property(e => e.Estado)
+                .HasDefaultValue(1)
+                .HasColumnName("estado");
             entity.Property(e => e.FechaCreacion)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("fecha_creacion");
@@ -282,6 +364,7 @@ public partial class PostgresContext : DbContext
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("fecha_creacion");
             entity.Property(e => e.FechaFactura).HasColumnName("fecha_factura");
+            entity.Property(e => e.IdUsuario).HasColumnName("id_usuario");
             entity.Property(e => e.MontoBase).HasColumnName("monto_base");
             entity.Property(e => e.MontoIva).HasColumnName("monto_iva");
             entity.Property(e => e.NumeroControl).HasColumnName("numero_control");
@@ -292,6 +375,26 @@ public partial class PostgresContext : DbContext
                 .HasForeignKey<Venta>(d => d.Id)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("cliente_id_FK");
+        });
+
+        modelBuilder.Entity<VentaDetalle>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("venta_detalle");
+
+            entity.Property(e => e.Articulo)
+                .HasColumnType("character varying")
+                .HasColumnName("articulo");
+            entity.Property(e => e.Cantidad).HasColumnName("cantidad");
+            entity.Property(e => e.CodigoArticulo)
+                .HasColumnType("character varying")
+                .HasColumnName("codigo_articulo");
+            entity.Property(e => e.Descuento).HasColumnName("descuento");
+            entity.Property(e => e.IdVenta).HasColumnName("id_venta");
+            entity.Property(e => e.Iva).HasColumnName("iva");
+            entity.Property(e => e.PrecioTotal).HasColumnName("precio_total");
+            entity.Property(e => e.PrecioUnitario).HasColumnName("precio_unitario");
         });
 
         OnModelCreatingPartial(modelBuilder);

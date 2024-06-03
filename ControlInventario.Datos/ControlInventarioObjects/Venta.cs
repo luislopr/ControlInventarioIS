@@ -23,5 +23,7 @@ public partial class Venta
 
     public TimeOnly FechaCreacion { get; set; }
 
+    public int IdUsuario { get; set; }
+
     public virtual Cliente IdNavigation { get; set; } = null!;
 }

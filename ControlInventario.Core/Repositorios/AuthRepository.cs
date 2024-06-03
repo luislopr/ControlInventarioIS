@@ -43,7 +43,7 @@ public class AuthRepository(PostgresContext contextFactory, IOptions<AppSettings
     {
         var usuario = await _usersRepository.ObtenerUsuarioCredenciales(username, password, cancellationToken);
         if (usuario == null) throw new InvalidOperationException("Usuario o clave inválida");
-        if (usuario.Status == false) throw new InvalidOperationException("Usuario inactivo");
+        if (usuario.Estado == 1) throw new InvalidOperationException("Usuario inactivo");
 
         JwtSecurityTokenHandler tokenHandler = new();
         byte[] key = Encoding.ASCII.GetBytes(_appSettings.Secret);

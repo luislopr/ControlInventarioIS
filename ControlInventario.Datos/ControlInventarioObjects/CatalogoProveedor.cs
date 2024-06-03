@@ -17,5 +17,7 @@ public partial class CatalogoProveedor
 
     public DateTime FechaCreacion { get; set; }
 
+    public string CodigoArticulo { get; set; } = null!;
+
     public virtual Proveedor IdProveedorNavigation { get; set; } = null!;
 }

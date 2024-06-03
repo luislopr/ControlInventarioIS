@@ -10,7 +10,7 @@ public class DtoUsuario
         this.FechaCreacion = usuario.FechaCreacion;
         this.Email = usuario.Email;
         this.Id = usuario.Id;
-        this.Status = usuario.Status;
+        this.Status = usuario.Estado;
     }
     public int Id { get; set; }
 
@@ -24,5 +24,5 @@ public class DtoUsuario
 
     public int RoleId { get; set; }
     public string Rol { get; set; } = null!;
-    public bool Status { get; set; }
+    public int Status { get; set; }
 }

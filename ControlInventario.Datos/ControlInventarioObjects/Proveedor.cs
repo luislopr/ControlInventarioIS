@@ -25,5 +25,5 @@ public partial class Proveedor
 
     public virtual ICollection<CatalogoProveedor> CatalogoProveedor { get; set; } = new List<CatalogoProveedor>();
 
-    public virtual Factura? Factura { get; set; }
+    public virtual ICollection<Orden> Orden { get; set; } = new List<Orden>();
 }
