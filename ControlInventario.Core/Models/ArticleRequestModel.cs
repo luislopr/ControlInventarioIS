@@ -5,25 +5,25 @@ public class ArticleRequestModel
 {
     [MinLength(5)]
     [Required(ErrorMessage = "Ingrese Código de Barras")]
-    public string Barcode { get; set; }
+    public string CodigoBarra { get; set; }
 
 
     [Required(ErrorMessage = "Ingrese El Nombre del Artículo")]
-    public string ArticleName { get; set; }
+    public string NombreArticulo { get; set; }
 
 
     [Required(ErrorMessage = "Ingrese Código del Artículo")]
-    public int ArticleCode { get; set; }
-
-    public decimal Tax { get; set; } = 0;
-    public decimal PriceVEF { get; set; }
-    public decimal? PriceREF { get; set; }
-    public bool Status { get; set; } = true;
-    public int ArticleId { get; internal set; }
+    public int CodigoArticuloExterno { get; set; }
+    [Required(ErrorMessage = "Seleccione un proveedor")]
+    public int IdProveedor { get; set; }
+    public decimal IVA { get; set; } = 0;
+    public decimal Costo { get; set; }
+    //public decimal? PriceREF { get; set; }
+    //public bool Status { get; set; } = true;
 
     public bool IsValid()
     {
-        if (Barcode == string.Empty || ArticleName == string.Empty || ArticleCode < 1) 
+        if (CodigoBarra == string.Empty || NombreArticulo == string.Empty || CodigoArticuloExterno < 1) 
             return false;
         return true;
     }

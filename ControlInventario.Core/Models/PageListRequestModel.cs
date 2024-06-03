@@ -23,6 +23,12 @@ public class PageListRequestModel
     }
 }
 
+
+public class ArticleListRequestModel : PageListRequestModel
+{
+    public int IdProveedor { get; set; }
+}
+
 public class PageListRequestModelExtended : PageListRequestModel
 {
     public bool Pending { get; set; } = true;

@@ -4,7 +4,6 @@ using ControlInventario.Core.Repositorios;
 using ControlInventario.Core.Helpers;
 using Microsoft.Extensions.Options;
 using ControlInventario.Datos.DTO;
-using System.Collections.Generic;
 
 namespace ControlInventario.Core.Repositories;
 
