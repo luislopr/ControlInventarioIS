@@ -27,7 +27,7 @@ public partial class PostgresContext : DbContext
 
     public virtual DbSet<Roles> Roles { get; set; }
 
-    public virtual DbSet<SystemUuidKey> SystemUuidKey { get; set; }
+    public virtual DbSet<SystemConfig> SystemConfig { get; set; }
 
     public virtual DbSet<TipoOrden> TipoOrden { get; set; }
 
@@ -106,6 +106,8 @@ public partial class PostgresContext : DbContext
                 .HasNoKey()
                 .ToTable("inventario");
 
+            entity.HasIndex(e => e.IdArticuloProveedor, "inventario_unique").IsUnique();
+
             entity.Property(e => e.CodigoArticulo)
                 .HasColumnType("character varying")
                 .HasColumnName("codigo_articulo");
@@ -127,8 +129,14 @@ public partial class PostgresContext : DbContext
                 .ValueGeneratedOnAdd()
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
+            entity.Property(e => e.IdArticuloProveedor).HasColumnName("id_articulo_proveedor");
             entity.Property(e => e.Precio).HasColumnName("precio");
             entity.Property(e => e.ProveedorId).HasColumnName("proveedor_id");
+
+            entity.HasOne(d => d.IdArticuloProveedorNavigation).WithOne()
+                .HasForeignKey<Inventario>(d => d.IdArticuloProveedor)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("inventario_catalogo_proveedor_fk");
 
             entity.HasOne(d => d.Proveedor).WithMany()
                 .HasForeignKey(d => d.ProveedorId)
@@ -274,11 +282,11 @@ public partial class PostgresContext : DbContext
                 .HasColumnName("rol");
         });
 
-        modelBuilder.Entity<SystemUuidKey>(entity =>
+        modelBuilder.Entity<SystemConfig>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("system_uuid_key_pkey");
 
-            entity.ToTable("system_uuid_key");
+            entity.ToTable("system_config");
 
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
@@ -289,6 +297,9 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.ExpirationDate)
                 .HasDefaultValueSql("(CURRENT_TIMESTAMP + '2 days'::interval day)")
                 .HasColumnName("expiration_date");
+            entity.Property(e => e.IdMetodoAutoOrden)
+                .HasDefaultValue(0)
+                .HasColumnName("id_metodo_auto_orden");
             entity.Property(e => e.Uuid)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("uuid");

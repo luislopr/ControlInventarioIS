@@ -23,5 +23,9 @@ public partial class Inventario
 
     public string CodigoBarra { get; set; } = null!;
 
+    public int IdArticuloProveedor { get; set; }
+
+    public virtual CatalogoProveedor IdArticuloProveedorNavigation { get; set; } = null!;
+
     public virtual Proveedor Proveedor { get; set; } = null!;
 }

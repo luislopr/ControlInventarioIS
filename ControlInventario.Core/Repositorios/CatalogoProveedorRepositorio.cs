@@ -17,6 +17,7 @@ public class CatalogoProveedorRepositorio(PostgresContext contextFactory, IOptio
     : Repository<PostgresContext, CatalogoProveedor>(contextFactory, appSettings), ICatalogoProveedorRepositorio
 {
     private readonly IUsuariosRepositorio _usuariosRepositorio = usuariosRepositorio;
+    public async Task<CatalogoProveedor> ObtenerArticuloProveedorPorId(int id) => await base.GetById(id);
     public async Task<DtoBaseResponse> ActualizarArticulo(ArticleRequestModelExtended articleRequestModel, CancellationToken cancellationToken)
     {
         var article = this.ModelArticle(articleRequestModel);

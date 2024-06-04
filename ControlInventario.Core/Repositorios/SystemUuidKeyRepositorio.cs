@@ -7,8 +7,8 @@ using ControlInventario.Core.Repositorios.Interfaces;
 namespace ControlInventario.Core.Repositories;
 
 public class SystemUuidKeyRepositorio(PostgresContext contextFactory, IOptions<AppSettings> appSettings)
-    : Repository<PostgresContext, SystemUuidKey>(contextFactory, appSettings), ISystemUuidRepositorio
+    : Repository<PostgresContext, SystemConfig>(contextFactory, appSettings), ISystemUuidRepositorio
 {
-    public async Task<SystemUuidKey> GetSystemUuidKeyAsync(CancellationToken cancellationToken)
+    public async Task<SystemConfig> GetSystemUuidKeyAsync(CancellationToken cancellationToken)
         => await base.GetFirst() ?? throw new InvalidOperationException("No se a encontrado la llave en el sistema, consulte al proveedor del Software");
 }

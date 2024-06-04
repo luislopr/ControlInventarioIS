@@ -12,4 +12,5 @@ public interface ICatalogoProveedorRepositorio
     Task<DtoBaseResponse> CargarArticulos(IFormFile archivoExcel, int providerId, CancellationToken cancellationToken);
     Task<DtoBaseResponse> ActualizarArticulo(ArticleRequestModelExtended articleRequestModel, CancellationToken cancellationToken);
     Task<byte[]> GetExcelArticleFormat(CancellationToken cancellationToken);
+    Task<CatalogoProveedor> ObtenerArticuloProveedorPorId(int id);
 }
